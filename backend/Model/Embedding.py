@@ -12,7 +12,7 @@ model_path = hf_hub_download(repo_id="arnabdhar/YOLOv8-Face-Detection", filename
 # load model
 model = YOLO(model_path)
 
-dataset_path="Dataset"
+dataset_path="DatasetOnce"
 embeddings={}
 
 #['Anushka_Sharma', 'Barack_Obama', 'Bill_Gates', 'Dalai_Lama', 'Narendra_Modi']
@@ -31,7 +31,7 @@ for person_name in os.listdir(dataset_path):
             for box in boxes:
                 x1,y1,x2,y2=box.xyxy[0]
                 x1,y1,x2,y2=int(x1),int(y1),int(x2),int(y2)
-                img=Image.open(img_path)
+                img=Image.open(img_path).convert("RGB")
                 face_crop=img.crop((x1,y1,x2,y2))
                 face_array=np.array(face_crop)
                 
@@ -40,5 +40,20 @@ for person_name in os.listdir(dataset_path):
                 if encodings:
                     embeddings[person_name].append(encodings[0])
                 
-np.save("Embedding_file.npy", embeddings)
+# np.save("Embedding_file2.npy", embeddings)
 print("Embeddings saved!")
+
+
+#Insert to Database:
+from SupabaseClient import supabase
+import numpy as np
+
+
+for name, embedding in embeddings.items():
+    embeddingList = []
+    for emb in embedding:
+        embeddingList.append(emb.tolist())
+    data = {"Username": name, "Embeddings": embeddingList}
+
+    response = supabase.table("Users").insert(data).execute()
+    print(response)

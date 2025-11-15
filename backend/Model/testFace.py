@@ -13,7 +13,7 @@ model_path = hf_hub_download(
 # load model
 model = YOLO(model_path)
 
-img_path = "virat.jpg"
+img_path = "test/SundarPichai.jpg"
 img = face_recognition.load_image_file(img_path)
 
 results = model(img)
@@ -35,17 +35,18 @@ for r in results:
 
 # Compare
 from scipy.spatial.distance import euclidean
+from SupabaseClient import supabase  #Import from db
 
-embedding_all = np.load("Embedding_file.npy", allow_pickle=True).item()
+response=supabase.table("Users").select("Username", "Embeddings").execute()
 
 for new_embedding in new_faces_embeddings:
     match_found=False
-    for name,emb_list in embedding_all.items():
-        for emb in emb_list:
+    for row in response.data:
+        for emb in row["Embeddings"]:
             distance=euclidean(emb,new_embedding)
-            if distance <0.5:
-                print(f"Attandence marked:{name}")
-                print(name,distance)
+            if distance <0.4:
+                print(f"Attandence marked:{row["Username"]}")
+                print(row["Username"],distance)
                 match_found=True
                 break
             
