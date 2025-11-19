@@ -1,6 +1,3 @@
-import os
-from PIL import Image
-
-path="Dataset/Anish Shrestha/1.png"
-img=Image.open(path)
-print(type(img))
+col=["Hello", "World"]
+cans=",".join(col)
+print(cans)
